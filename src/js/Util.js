@@ -178,8 +178,43 @@ var Util = {
             win.document.title = date;
             win.document.body.appendChild(img);
             doneCallback();
+
+            // ここはURLって書いてあるけど、data:image/png;base64,XXXXXXXXXXXXXXXXXXXXXXXXX...
+            // で始まるバイナリ文字列が入ってる。この形式を扱いたい
+            //Util.sendServer(dataUrl);
+
             return;
         });
+    },
+
+    sendServer : function(binaryString){
+
+        var EncodeHTMLForm = function(data){
+            var params = [];
+            for(var name in data){
+                var value = data[name];
+                var param = encodeURIComponent( name ).replace( /%20/g, '+' )
+                    + '=' + encodeURIComponent( value ).replace( /%20/g, '+' );
+                params.push( param );
+            }
+            return params.join( '&' );
+        }
+
+        var xhr = new XMLHttpRequest();
+        //xhr.open('POST', 'http://otiai10.com:5000/upload');
+        xhr.open('POST', 'http://otiai10.com:5000/upload');
+
+        var data =  EncodeHTMLForm({
+            imgBin : binaryString
+        });
+
+        xhr.addEventListener('load',function(ev){
+            if(xhr.status !== 200) return alert(xhr.status);
+            alert(xhr.status);
+            console.log(JSON.parse(xhr.response));
+        });
+
+        xhr.send(data);
     },
 
     getNearestDailyAchievementResetTime : function(){
